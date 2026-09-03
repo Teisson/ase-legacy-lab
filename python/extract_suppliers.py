@@ -27,3 +27,15 @@ connection_string = (
 
 #pyodbc connection to the ASE database using the connection string
 connection = pyodbc.connect(connection_string)
+
+print("Connection established successfully.")
+
+print(type(connection))
+cursor = connection.cursor()
+print(type(cursor))
+
+cursor.execute("SELECT * FROM tester.suppliers")
+rows = cursor.fetchone()
+
+print("First row of the 'suppliers' table:")
+print(rows)
