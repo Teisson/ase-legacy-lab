@@ -34,11 +34,18 @@ print(type(connection))
 cursor = connection.cursor()
 print(type(cursor))
 
-# Execute a query to fetch the first row from the 'suppliers' table in the 'tester' schema
+'''# Execute a query to fetch the first row from the 'suppliers' table in the 'tester' schema
 cursor.execute("SELECT * FROM tester.suppliers")
 row = cursor.fetchone()
 
 print("First row of the 'suppliers' table:")
 print(row)
 
-print(cursor.description)  # Print column names and types
+print(cursor.description)  # Print column names and types'''
+
+cursor.execute("SELECT * FROM tester.suppliers")
+rows = cursor.fetchall()
+print(type(rows))
+print(f"Number of rows fetched: {len(rows)}")
+for row in rows:
+    print(f"Supplier {row[0]}: {row[1]} ({row[2]})")  # Print the first three columns of each row in an ordered format
