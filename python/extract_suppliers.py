@@ -2,6 +2,7 @@ import os
 import pyodbc
 from dotenv import load_dotenv
 
+#Loads environment variables from a .env file
 load_dotenv()
 
 ASE_USER = os.getenv("ASE_USER")
@@ -13,6 +14,7 @@ ASE_PORT = os.getenv("ASE_PORT")
 
 print(f"Connecting to ASE database '{ASE_DATABASE}' on server '{ASE_SERVER}' at {ASE_HOST}:{ASE_PORT} with user '{ASE_USER}'")
 
+# Connection string variable for connecting to the ASE database using FreeTDS driver
 connection_string = (
     f"DRIVER={{FreeTDS}};"
     f"TDS_VERSION=5.0;"
@@ -23,4 +25,5 @@ connection_string = (
     f"PWD={ASE_PASSWORD};"
 )
 
+#pyodbc connection to the ASE database using the connection string
 connection = pyodbc.connect(connection_string)
