@@ -34,8 +34,11 @@ print(type(connection))
 cursor = connection.cursor()
 print(type(cursor))
 
+# Execute a query to fetch the first row from the 'suppliers' table in the 'tester' schema
 cursor.execute("SELECT * FROM tester.suppliers")
-rows = cursor.fetchone()
+row = cursor.fetchone()
 
 print("First row of the 'suppliers' table:")
-print(rows)
+print(row)
+
+print(cursor.description)  # Print column names and types
