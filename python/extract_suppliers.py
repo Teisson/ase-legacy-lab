@@ -1,20 +1,18 @@
 from db import get_connection
 
+# Establish a connection to the ASE database
 connection = get_connection()
-print("Connection established successfully.")
 
+# Create a cursor object to execute SQL queries
 cursor = connection.cursor()
 
+# Execute a SQL query to retrieve all rows from the "tester.suppliers" table
 cursor.execute("SELECT * FROM tester.suppliers")
 rows = cursor.fetchall()
-print(type(rows))
-print(f"Number of rows fetched: {len(rows)}")
-for row in rows:
-    print(f"Supplier {row[0]}: {row[1]} ({row[2]})")  # Print the first three columns of each row in an ordered format
 
-print(cursor.description)  # Print column names and types
-print(cursor.description[0])  # Print the description of the first column
-print(cursor.description[1][0])  # Print the name of the first column
-
+# Get the column names from the cursor description
 column_names = [column[0] for column in cursor.description]
-print(column_names)  # Print the list of column names
+
+# Create a list of dictionaries for all rows
+suppliers = [dict(zip(column_names, row)) for row in rows]  
+print(suppliers)  # Print the list of dictionaries representing all rows
