@@ -1,5 +1,7 @@
 from db import get_connection
 
+connection = get_connection()
+
 def extract_suppliers():
     """
     Extracts all rows from the "tester.suppliers" table and returns them as a list of dictionaries.
@@ -8,8 +10,6 @@ def extract_suppliers():
         list: A list of dictionaries where each dictionary represents a row in the "tester.suppliers" table.
     """
 
-    # Establish a connection to the ASE database
-    connection = get_connection()
 
     # Create a cursor object to execute SQL queries
     cursor = connection.cursor()

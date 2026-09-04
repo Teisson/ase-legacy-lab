@@ -1,15 +1,14 @@
 from db import get_connection
 
-def extract_purchase_orders():
+connection = get_connection()
+
+def extract_purchase_orders(connection):
     """
     Extracts all rows from the "tester.purchase_orders" table and returns them as a list of dictionaries.
 
     Returns:
         list: A list of dictionaries where each dictionary represents a row in the "tester.purchase_orders" table.
     """
-
-    # Establish a connection to the ASE database
-    connection = get_connection()
 
     # Create a cursor object to execute SQL queries
     cursor = connection.cursor()
@@ -26,5 +25,5 @@ def extract_purchase_orders():
     return orders  
 
 # Call the function and print the result
-orders = extract_orders()
+orders = extract_purchase_orders(connection)
 print(orders)
