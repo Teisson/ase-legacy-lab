@@ -1,8 +1,4 @@
-from db import get_connection
-
-connection = get_connection()
-
-def extract_suppliers():
+def extract_suppliers(connection):
     """
     Extracts all rows from the "tester.suppliers" table and returns them as a list of dictionaries.
     
@@ -24,7 +20,3 @@ def extract_suppliers():
     # Create a list of dictionaries for all rows
     suppliers = [dict(zip(column_names, row)) for row in rows]  
     return suppliers
-
-# Call the function and print the result
-suppliers = extract_suppliers()
-print(suppliers)

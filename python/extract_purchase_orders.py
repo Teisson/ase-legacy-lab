@@ -1,7 +1,3 @@
-from db import get_connection
-
-connection = get_connection()
-
 def extract_purchase_orders(connection):
     """
     Extracts all rows from the "tester.purchase_orders" table and returns them as a list of dictionaries.
@@ -23,7 +19,3 @@ def extract_purchase_orders(connection):
     # Create a list of dictionaries for all rows
     orders = [dict(zip(column_names, row)) for row in rows]  
     return orders  
-
-# Call the function and print the result
-orders = extract_purchase_orders(connection)
-print(orders)
