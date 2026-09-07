@@ -2,21 +2,21 @@
 
 Small hands-on lab for learning SAP Adaptive Server Enterprise 16 and exploring legacy-to-modern data engineering patterns.
 
-The project uses a containerized ASE environment on RHEL and focuses on practical database behavior, SQL workflows, transaction handling and patterns relevant when working with legacy data sources.
+The project uses a containerized ASE environment on RHEL and focuses on practical database behavior, SQL workflows, transaction handling, Python extraction, connection management and patterns relevant when working with legacy data sources.
 
 ## Environment
 
-**Host**
+### Host
 
 - Red Hat Enterprise Linux 9.8
 - x86_64
 - VMware virtual machine
 
-**Container runtime**
+### Container runtime
 
 - Podman 5.8.2
 
-**SAP ASE**
+### SAP ASE
 
 - SAP Adaptive Server Enterprise 16.0 SP02
 - Container image: `docker.io/datagrip/sybase:16.0`
@@ -38,6 +38,10 @@ ase-legacy-lab/
 ├── scripts/
 │   └── run_sql.sh
 ├── python/
+│   ├── db.py
+│   ├── extract_suppliers.py
+│   ├── extract_purchase_orders.py
+│   └── run_extraction.py
 ├── .env.example
 ├── .gitignore
 └── README.md
@@ -102,6 +106,8 @@ ASE_USER=<lab-user>
 ASE_PASSWORD=<lab-password>
 ASE_DATABASE=testdb
 ASE_SERVER=MYSYBASE
+ASE_HOST=127.0.0.1
+ASE_PORT=5000
 ```
 
 `.env` is ignored by Git and should not be committed.
@@ -160,6 +166,94 @@ The runner:
 - executes the selected SQL file through `isql`
 
 This keeps environment-specific configuration and credentials outside the SQL files and version control.
+
+## Python Extraction
+
+Python connects to SAP ASE from the RHEL host using the following connection path:
+
+```text
+Python
+  ↓
+pyodbc
+  ↓
+unixODBC
+  ↓
+FreeTDS
+  ↓
+TCP 127.0.0.1:5000
+  ↓
+Podman
+  ↓
+SAP ASE 16
+```
+
+The Python extraction layer is separated into distinct responsibilities:
+
+- `db.py` loads local configuration and creates the database connection
+- `extract_suppliers.py` extracts supplier data
+- `extract_purchase_orders.py` extracts purchase-order data
+- `run_extraction.py` orchestrates extraction and owns the database connection lifecycle
+
+Both extractor functions receive an existing connection rather than creating their own.
+
+This allows the runner to:
+
+1. open the connection
+2. select the requested extraction
+3. pass the same connection to the extractor
+4. return extracted data
+5. close the connection after execution
+
+The connection is closed in a `finally` block so cleanup occurs even if extraction fails.
+
+Run the extraction from the repository root:
+
+```bash
+python ./python/run_extraction.py
+```
+
+The runner currently accepts:
+
+```text
+purchase_orders
+suppliers
+```
+
+User input is normalized using `strip()` and `lower()` before evaluation.
+
+Invalid table selections are handled without attempting an extraction.
+
+### Extracted Data Structure
+
+Queries are executed through a `pyodbc` cursor.
+
+Column names are retrieved from:
+
+```python
+cursor.description
+```
+
+and combined with each returned row to produce dictionaries.
+
+The resulting structure is:
+
+```text
+list[dict]
+```
+
+For example:
+
+```python
+[
+    {
+        "supplier_id": 1,
+        "supplier_name": "Volvo",
+        "country": "SE"
+    }
+]
+```
+
+This provides a convenient structure for later Python transformation and validation work.
 
 ## Database Schema
 
@@ -343,16 +437,63 @@ This was tested interactively by:
 
 The scripted transaction handling then reproduced this behavior with automatic rollback using `@@error`.
 
+## Python / Connectivity Notes
+
+### FreeTDS and unixODBC
+
+ASE connectivity from Python uses FreeTDS through unixODBC.
+
+The connection was verified independently at multiple layers before connecting from Python:
+
+```text
+ASE/isql
+   ↓
+FreeTDS/tsql
+   ↓
+unixODBC/isql
+   ↓
+pyodbc
+```
+
+This helped isolate configuration and driver problems from Python application problems.
+
+### TDS protocol
+
+The working FreeTDS connection uses TDS version `5.0`.
+
+### Connection ownership
+
+Database connections are created centrally rather than independently inside each extractor.
+
+Extractor functions receive the connection as an argument:
+
+```python
+extract_suppliers(connection)
+extract_purchase_orders(connection)
+```
+
+This separates resource ownership from extraction logic and allows the runner to manage connection cleanup centrally.
+
+### Error handling
+
+The extraction runner uses Python `try`, `except` and `finally`.
+
+The `finally` block ensures that the database connection is closed even if an extraction raises an exception.
+
 ## Next Steps
 
-- Connect to ASE from Python
-- Extract and validate legacy data
+- Transform extracted data in Python
+- Add data validation and data-quality checks
 - Explore indexes and query plans
 - Inspect ASE metadata and system tables
 - Model extracted data for a modern target platform
+- Add a simple load target for an end-to-end ETL workflow
 
 ### Possible Later Extensions
 
 - Stored procedures
 - Repeatable/idempotent database deployment patterns
 - Automated data-quality checks
+- Incremental extraction patterns
+- Logging and execution metadata
+- Scheduling/orchestration
