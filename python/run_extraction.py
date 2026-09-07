@@ -4,19 +4,24 @@ from extract_suppliers import extract_suppliers
 
 connection = get_connection()
 
+data = None
+
 table = input("Enter the table name (purchase_orders or suppliers): ").strip().lower()
 
-if table == "purchase_orders":
-    data = extract_purchase_orders(connection)
-elif table == "suppliers":
-    data = extract_suppliers(connection)
-else:
-    data = None
-
-connection.close()
+try:
+    if table == "purchase_orders":
+        data = extract_purchase_orders(connection)
+    elif table == "suppliers":
+        data = extract_suppliers(connection)
+    else:
+        data = None
+        print("Invalid table name. Please enter either 'purchase_orders' or 'suppliers'.")
+except Exception as e:
+    print(f"An error occurred: {e}")
+finally:
+    connection.close()
 
 if data is not None:
     print(f"Data from {table} table:")
     print(data)
-else:
-    print("Invalid table name. Please enter either 'purchase_orders' or 'suppliers'.")
+
