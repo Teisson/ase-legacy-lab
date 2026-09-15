@@ -41,7 +41,7 @@ ase-legacy-lab/
 │   ├── db.py
 │   ├── extract_suppliers.py
 │   ├── extract_purchase_orders.py
-│   └── run_extraction.py
+│   └── main.py
 ├── .env.example
 ├── .gitignore
 └── README.md
@@ -192,7 +192,7 @@ The Python extraction layer is separated into distinct responsibilities:
 - `db.py` loads local configuration and creates the database connection
 - `extract_suppliers.py` extracts supplier data
 - `extract_purchase_orders.py` extracts purchase-order data
-- `run_extraction.py` orchestrates extraction and owns the database connection lifecycle
+- `main.py` orchestrates extraction and owns the database connection lifecycle
 
 Both extractor functions receive an existing connection rather than creating their own.
 
@@ -209,7 +209,7 @@ The connection is closed in a `finally` block so cleanup occurs even if extracti
 Run the extraction from the repository root:
 
 ```bash
-python ./python/run_extraction.py
+python ./python/main.py
 ```
 
 The runner currently accepts:
