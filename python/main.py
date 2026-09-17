@@ -1,27 +1,27 @@
 from db import get_connection
 from extract_purchase_orders import extract_purchase_orders
 from extract_suppliers import extract_suppliers
+from transform import transform_orders
 
 connection = get_connection()
 
-data = None
-
-table = input("Enter the table name (purchase_orders or suppliers): ").strip().lower()
-
 try:
-    if table == "purchase_orders":
-        data = extract_purchase_orders(connection)
-    elif table == "suppliers":
-        data = extract_suppliers(connection)
-    else:
-        data = None
-        print("Invalid table name. Please enter either 'purchase_orders' or 'suppliers'.")
-except Exception as e:
-    print(f"An error occurred: {e}")
+    orders = extract_purchase_orders(connection)
+    suppliers = extract_suppliers(connection)
+
+    enriched_orders = transform_orders(suppliers, orders)
+
+    print("Orders in:", len(orders))
+    print("Orders out:", len(enriched_orders))
+    print("First enriched order:")
+    print(enriched_orders[0])
+
 finally:
     connection.close()
+  
+assert len(orders) == len(enriched_orders)
+assert "supplier_name" in enriched_orders[0]
 
-if data is not None:
-    print(f"Data from {table} table:")
-    print(data)
-
+print(len(orders))
+print(len(enriched_orders))
+print(enriched_orders[0])
