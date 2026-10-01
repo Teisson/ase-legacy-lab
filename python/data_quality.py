@@ -25,3 +25,9 @@ def check_orders(orders):
         elif order_id in seen_order_ids:
             raise ValueError(f"Duplicate order_id found: {order['order_id']}")
         seen_order_ids.add(order_id)
+
+def check_supplier_references(suppliers, orders):
+    valid_supplier_ids = set(supplier["supplier_id"] for supplier in suppliers)
+    for order in orders:
+        if order["supplier_id"] not in valid_supplier_ids:
+            raise ValueError(f"Order references non-existent supplier_id: {order['supplier_id']}")
