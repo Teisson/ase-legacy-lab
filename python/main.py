@@ -1,6 +1,7 @@
 from db import get_connection
 from extract_purchase_orders import extract_purchase_orders
 from extract_suppliers import extract_suppliers
+from data_quality import check_suppliers, check_orders, check_supplier_references
 from transform import transform_orders
 
 connection = None
@@ -9,6 +10,10 @@ try:
     connection = get_connection()
     orders = extract_purchase_orders(connection)
     suppliers = extract_suppliers(connection)
+
+    check_suppliers(suppliers)
+    check_orders(orders)
+    check_supplier_references(suppliers, orders)
 
     enriched_orders = transform_orders(suppliers, orders)
 
